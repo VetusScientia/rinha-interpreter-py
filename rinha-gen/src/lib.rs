@@ -4,6 +4,8 @@ use clap::Parser;
 use lalrpop_util::lalrpop_mod;
 use miette::IntoDiagnostic;
 use owo_colors::OwoColorize;
+use std::fs::File;
+use std::io::Write;
 
 // The lalrpop module, it does generate the parser and lexer
 // for the language.
@@ -80,8 +82,21 @@ pub fn program() -> miette::Result<()> {
     } else {
         serde_json::to_string(&file).into_diagnostic()?
     };
-
-    println!("{json}");
+    
+    let json_filename = format!("{}.rinha.json", command.main.trim_end_matches(".rinha"));
+    
+    println!("{}", json);
+    
+    match File::create(&json_filename) {
+        Ok(mut file) => {
+            if let Err(err) = file.write_all(json.as_bytes()) {
+                eprintln!("Erro ao escrever no arquivo: {:?}", err);
+            }
+        },
+        Err(err) => {
+            eprintln!("Erro ao criar o arquivo: {:?}", err);
+        }
+    }    
 
     Ok(())
 }
