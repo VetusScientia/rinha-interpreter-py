@@ -1,60 +1,153 @@
-<div align="center">
+# Rinha Interpreter
 
-![banner]
+Olá! 👋 Welcome ao Rinha Interpreter, um projeto desenvolvido com o objetivo de interpretar a linguagem Rinha. Este interpretador foi feito para uma Rinha de Compiladores (ou interpretadores, rs), mais informações [aqui](https://github.com/aripiprazole/rinha-de-compiler/).
 
-</div>
+## Introdução
 
-# Introdução
+O Rinha Interpreter trabalha com árvores sintáticas abstratas (AST), que são armazenadas no formato JSON. Sua principal função é interpretar programas com base nas informações contidas nessa AST.
 
-O ideal da rinha é fazer um interpretador ou compilador que rode em uma maquina com 2 núcleos e 2G de RAM.
+## Como Executar
 
-O seu interpretador ou compilador deve trabalhar com algo chamado "árvore sintática abstrata" que está armazenada no formato JSON. Essa árvore sintática abstrata será gerada por nós usando uma ferramenta específica disponível neste repositório.
+Para executar o Rinha Interpreter, siga os passos abaixo:
 
-Sua responsabilidade na tarefa é receber esse JSON que contém a árvore abstrata e, em seguida, interpretar ou compilar o programa de acordo com as informações fornecidas na árvore abstrata.
+### Requisitos
 
-Simplificando:
+1. Python 3.x instalado.
 
-1. Nós te damos um JSON com uma árvore dentro
-2. Voce roda o JSON
-3. Voce fica feliz que apareceu o resultado.
+### Executando um Programa Rinha
 
-## Para executar
+### Com Docker
 
-Depois será adicionado como executar
+1. Abra o terminal ou prompt de comando;
+2. Use os seguintes comandos:
 
-## Como testar
+```bash
+docker build -t rinha_interprete .
+docker run rinha_interprete
+```
 
-Para testar você pode usar o arquivo `files/fib.rinha` e gerar com o programa que disponibilizamos
-aqui para um JSON ou você pode usar diretamente o JSON que está em `files/fib.json`.
+### Sem Docker
 
-Durante a rinha nós iremos adicionar outros testes :)
+1. Abra o terminal ou prompt de comando;
+2. Navegue até o diretório onde o arquivo **main.py** (com os demais arquivos do interpretador) está localizado;
+3. Use o seguinte comando:
 
-## Requisitos
+```bash
+python main.py -s nome_do_arquivo.rinha.json
+```
 
-Você tem que fazer um PR, alterando o arquivo [PARTICIPANTS.md](PARTICIPANTS.md),
-com uma nova linha e seu repositório. Talvez isso seja mudado depois (fique atento).
+Substitua **nome_do_arquivo.rinha.json** pelo nome do arquivo Rinha que você deseja executar.
 
-Seu repositório terá que ter uma imagem no root do repositório, e buildaremos a imagem
-no rankeamento.
+## Como Testar
 
-## Especificação
+Você pode testar o interpretador utilizando o arquivo `var/rinha/fib.rinha` e gerando o JSON correspondente com a ferramenta fornecida nesse [repositório](https://github.com/aripiprazole/rinha-de-compiler). E em seguida rodar o JSON disponível em `var/rinha/fib.rinha.json`. Existem outros códigos que você pode testar no diretório `var/rinha/`.
 
-A linguagem terá que rodar com base em algum arquivo, que é o JSON da AST da
-rinha especificado [aqui](https://github.com/aripiprazole/rinha-de-compiler/blob/main/SPECS.md).
+## Funcionamento da Linguagem Rinha
 
-1. O arquivo terá que ser lido de `/var/rinha/source.rinha.json`
-2. Poderá também ser lido de `/var/rinha/source.rinha`, se você quiser ler a AST
-na mão.
+A linguagem Rinha é uma linguagem de programação dinâmica que possui um conjunto de funcionalidades e uma sintaxe simples. Abaixo, vamos explorar algumas das principais funcionalidades da linguagem:
 
-A linguagem é uma linguagem de programação dinâmica, como JavaScript, Ruby, etc.
+### Tipos de Dados
 
-O projeto da rinha de compilador, tem um "interpretador" do json, que retorna
-um AST, e o código terá que ser testado de diferentes formas, como outros
-algorítimos além de Fibonacci.
+A linguagem Rinha possui três tipos de dados principais:
 
-## Exemplo
+1. **Inteiros (Int)**: Representam números inteiros de 32 bits.
+   Exemplo: `42`
 
-Exemplo com fibonacci
+2. **Texto (Str)**: Representam sequências de caracteres.
+   Exemplo: `"Olá, Mundo"`
+
+3. **Booleanos (Bool)**: Representam valores verdadeiro ou falso.
+   Exemplo: `true`, `false`
+
+### Operadores
+
+A linguagem suporta uma variedade de operadores para realizar operações em diferentes tipos de dados. Alguns dos operadores mais comuns incluem:
+
+- **Aritméticos**: `+` (adição), `-` (subtração), `*` (multiplicação), `/` (divisão), `%` (resto).
+
+- **Comparação**: `==` (igual a), `!=` (diferente de), `<` (menor que), `>` (maior que), `<=` (menor ou igual a), `>=` (maior ou igual a).
+
+- **Lógicos**: `&&` (E lógico), `||` (OU lógico).
+
+### Estruturas de Controle
+
+A linguagem oferece estruturas de controle de fluxo para ajudar a controlar o comportamento do programa. Sendo ela:
+
+- **If-Else**: Permite executar diferentes blocos de código com base em uma condição.
+
+```javascript
+if (condicao) {
+    // Bloco de código se a condição for verdadeira
+} else {
+    // Bloco de código se a condição for falsa
+}
+```
+
+### Funções
+
+A linguagem Rinha permite a definição e chamada de funções. Uma função pode receber parâmetros e retornar um valor. Aqui está um exemplo de como definir e chamar uma função:
+
+```javascript
+let soma = fn(a, b) => {
+    a + b
+};
+
+let resultado = soma(10, 20);
+print(resultado)
+```
+
+### Variáveis
+
+Variáveis são usadas para armazenar valores e podem ser declaradas com a palavra-chave `let`. Elas podem ser reatribuídas com um novo valor.
+
+```javascript
+let nome = "João";
+nome = "Maria"; // Agora 'nome' possui o valor "Maria"
+```
+
+### Print
+
+A função `print` é usada para exibir mensagens no terminal.
+
+```javascript
+print("Olá, Mundo!")
+```
+
+### Tuplas
+
+Tuplas são estruturas de dados que podem conter dois elementos. Elas são imutáveis, o que significa que seus elementos não podem ser alterados depois de criados.
+
+```javascript
+let ponto = (10, 20);
+let x = first(ponto); // x terá o valor 10
+let y = second(ponto); // y terá o valor 20
+```
+
+### Comentários
+
+Comentários são utilizados para adicionar explicações ou anotações no código e não são executados. Eles começam com `//`.
+
+```javascript
+// Isto é um comentário
+```
+
+### Recursão
+
+A linguagem Rinha suporta recursão, o que significa que uma função pode chamar a si mesma. Loucura :O
+
+```javascript
+let fatorial = fn(n) => {
+    if (n <= 1) {
+      1
+    } else {
+        n * fatorial(n - 1)
+    }
+};
+```
+
+## Exemplo de Código
+
+Aqui está um exemplo de código Rinha que calcula o Fibonacci:
 
 ```javascript
 let fib = fn (n) => {
@@ -68,24 +161,30 @@ let fib = fn (n) => {
 print("fib: " + fib(10))
 ```
 
-# Competição
+# Outros
 
-O prazo para mandar os PRs, é até o dia 23/09, depois disso serão negados o
-projeto.
+O repositório está aberto a contribuições, então se você encontrar algum bug ou erro, por favor, abra uma nova issues e me avise, ou envie um novo pull requests, caso saiba como resolver. :)
 
-Será liberado para ajustes até o dia 25/09, você poderá arrumar sua implementação,
-depois da publicação dos testes.
+# Licença
 
-## Recursos
+MIT License
 
-Alguns recursos úteis para aprender como fazer seu próprio interpretador ou compilador são:
+Copyright (c) 2023 Emanuel Júnior
 
-- https://www.youtube.com/watch?v=t77ThZNCJGY
-- https://www.youtube.com/watch?v=LCslqgM48D4
-- https://ruslanspivak.com/lsbasi-part1/
-- https://www.youtube.com/playlist?list=PLjcmNukBom6--0we1zrpoUE2GuRD-Me6W
-- https://www.plai.org/
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Fique ligado que alguns vídeos e posts úteis chegarão em breve.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-[banner]: ./img/banner.png
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
