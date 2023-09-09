@@ -1,0 +1,18 @@
+let fibonacci = fn (n) => {
+    let fib = fn (n, a, b) => {
+        if (n == 0) {
+            a
+        } else {
+            fib(n - 1, b, a + b)
+        }
+    };
+    
+    if (n < 2) {
+        print("O " + n + "º termo da sequência de Fibonacci é: " + n)
+    } else {
+        let result = fib(n, 0, 1);
+        print("O " + n + "º termo da sequência de Fibonacci é: " + result)
+    }
+};
+
+fibonacci(300)

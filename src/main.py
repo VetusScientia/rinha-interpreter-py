@@ -14,8 +14,8 @@ def end_timer():
     end_time = resource.getrusage(resource.RUSAGE_SELF).ru_utime + resource.getrusage(resource.RUSAGE_SELF).ru_stime
     cpu_time = end_time - start_time
     memory_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024  # MB
-    print(f"CPU Time: {cpu_time} seconds")
-    print(f"Memory Usage: {memory_usage} MB")
+    print(f"\nCPU Time: {cpu_time:.6f} seconds")
+    print(f"Memory Usage: {memory_usage:.7f} MB")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Interpreter for Rinha language')
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.version:
-        print("Rinha Interpreter v1.1")
+        print("Rinha Interpreter v1.1.3")
     elif args.start:
         try:
             filename = args.start
