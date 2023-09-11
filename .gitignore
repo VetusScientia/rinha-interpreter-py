@@ -22,4 +22,3 @@ Cargo.lock
 src/comp.py
 src/test.py
 test/
-interpreter.py.b

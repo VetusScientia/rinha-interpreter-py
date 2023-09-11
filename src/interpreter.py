@@ -1,8 +1,4 @@
-from rinha_error import *
 from format_output import *
-from sympy import symbols
-
-MAX_CACHE_SIZE = 200
 
 cache = {}
 
@@ -11,22 +7,9 @@ class Closure:
         self.func_node = func_node
         self.environment = environment
 
-class CustomStack:
-    def __init__(self):
-        self.frames = []
-
-    def push(self, func_node, environment):
-        self.frames.append((func_node, environment))
-
-    def pop(self):
-        return self.frames.pop()
-
-    def is_empty(self):
-        return len(self.frames) == 0
-
-def limit_cache_size():
-    while len(cache) > MAX_CACHE_SIZE:
-        cache.pop(next(iter(cache)))
+def interpret_int(node, environment):
+    value = node.get("value", 0)
+    return value
 
 def interpret_str(node, environment):
     return node["value"]
@@ -79,18 +62,13 @@ def interpret_print(node, environment):
         output = ", ".join(str(val) for val in output)
     return output
 
-tail_call_recursion = False
 
 def interpret_function(node, environment):
     return Closure(node, environment)
 
-custom_stack = CustomStack()
-
 def interpret_call(node, environment):
-    global tail_call_recursion
     callee = interpret(node["callee"], environment)
     args = [interpret(arg, environment) for arg in node["arguments"]]
-
     func_node = callee.func_node if isinstance(callee, Closure) else callee
     call_key = (func_node["kind"], tuple(args))
 
@@ -102,23 +80,11 @@ def interpret_call(node, environment):
                 func_environment = environment.copy()
                 for param, arg in zip(func_node["parameters"], args):
                     func_environment[param["text"]] = arg
+                result = interpret(func_node["value"], func_environment)
 
-                if tail_call_recursion and func_node == tail_call_recursion:
-                    while True:
-                        result = interpret(func_node["value"], func_environment)
-                        if not callable(result):
-                            return result
-                else:
-                    custom_stack.push(func_node, func_environment)
-                    while not custom_stack.is_empty():
-                        func_node, func_environment = custom_stack.pop()
-                        result = interpret(func_node["value"], func_environment)
+                cache[call_key] = result
 
-                    tail_call_recursion = False
-
-                    cache[call_key] = result
-                    limit_cache_size()
-                    return result
+                return result
 
 def interpret_first(node, environment):
     tuple_value = interpret(node["value"], environment)
@@ -148,10 +114,6 @@ def interpret_var(node, environment):
 
 def interpret_parameter(node, environment):
     return node
-
-def interpret_int(node, environment):
-    value = node.get("value", 0)
-    return value
 
 def interpret(node, environment):
     try:

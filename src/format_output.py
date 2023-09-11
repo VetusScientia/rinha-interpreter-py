@@ -1,5 +1,9 @@
 import json
 
+class RinhaError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 def format_output(value):
     if isinstance(value, str):
         return value

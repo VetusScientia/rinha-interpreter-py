@@ -1,5 +1,4 @@
 import argparse
-from format_output import *
 from interpreter import *
 
 if __name__ == "__main__":
@@ -10,7 +9,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.version:
-        print("Rinha Interpreter v1.1.3")
+        print("Rinha Interpreter v1.1.4")
     elif args.start:
         try:
             filename = args.start
