@@ -1,13 +1,4 @@
 import json
-import sys
-
-sys.setrecursionlimit(10000)
-sys.set_int_max_str_digits(10000)
-
-class RinhaError(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-
 
 def format_output(value):
     if isinstance(value, str):
