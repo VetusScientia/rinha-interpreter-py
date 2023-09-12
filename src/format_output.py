@@ -1,4 +1,6 @@
-import json
+import ujson
+import sys
+sys.setrecursionlimit(10**6)
 
 class RinhaError(Exception):
     def __init__(self, message):
@@ -17,11 +19,11 @@ def format_output(value):
     elif isinstance(value, tuple):
         return f"({format_output(value[0])}, {format_output(value[1])})"
     elif isinstance(value, dict):
-        return json.dumps(value)
+        return ujson.dumps(value)
     else:
         raise RinhaError(f"Invalid output format for value: {value}")
 
 
 def load_json_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
-        return json.load(file)
+        return ujson.load(file)

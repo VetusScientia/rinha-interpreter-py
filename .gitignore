@@ -19,6 +19,7 @@ Cargo.lock
 
 .vscode
 test/
+var/rinha/wtf.rinha.txt
 
 # Exec
 

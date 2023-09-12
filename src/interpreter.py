@@ -1,9 +1,7 @@
 from format_output import *
 
-
 cache = {}
 global_environment = {}
-
 
 class Closure:
     def __init__(self, func_node, environment):
@@ -12,6 +10,20 @@ class Closure:
 
     def __str__(self):
         return "<#closure>"
+
+
+class CustomStack:
+    def __init__(self):
+        self.frames = []
+
+    def push(self, func_node, environment):
+        self.frames.append((func_node, environment))
+
+    def pop(self):
+        return self.frames.pop()
+
+    def is_empty(self):
+        return len(self.frames) == 0
 
 
 def interpret_int(node, environment):
@@ -48,7 +60,6 @@ def interpret_binary(node, environment):
     }
     if op == "Div" and rhs == 0:
         raise RinhaError("Division by zero")
-
     if op in operators:
         return operators[op](lhs, rhs)
     else:
@@ -75,38 +86,45 @@ def interpret_print(node, environment):
         output = ", ".join(str(val) for val in output)
     return output
 
+tail_call_recursion = False
 
 def interpret_function(node, environment):
     return Closure(node, environment)
 
+custom_stack = CustomStack()
+
 def interpret_call(node, environment):
+    global tail_call_recursion
     callee = interpret(node["callee"], environment)
     args = [interpret(arg, environment) for arg in node["arguments"]]
 
-    if isinstance(callee, Closure):
-        func_environment = callee.environment.copy()
-        for param, arg in zip(callee.func_node["parameters"], args):
-            func_environment[param["text"]] = arg
-        result = interpret(callee.func_node["value"], func_environment)
-        return result
-
-    call_key = (callee["kind"], tuple(args))
+    func_node = callee.func_node if isinstance(callee, Closure) else callee
+    call_key = (func_node["kind"], tuple(args))
 
     if call_key in cache:
         return cache[call_key]
     else:
-        if callee["kind"] == "Function":
-            if "name" not in callee:
+        if func_node["kind"] == "Function":
+            if "name" not in func_node:
                 func_environment = environment.copy()
-                for param, arg in zip(callee["parameters"], args):
+                for param, arg in zip(func_node["parameters"], args):
                     func_environment[param["text"]] = arg
-                result = interpret(callee["value"], func_environment)
 
-                cache[call_key] = result
+                if tail_call_recursion and func_node == tail_call_recursion:
+                    while True:
+                        result = interpret(func_node["value"], func_environment)
+                        if not callable(result):
+                            return result
+                else:
+                    custom_stack.push(func_node, func_environment)
+                    while not custom_stack.is_empty():
+                        func_node, func_environment = custom_stack.pop()
+                        result = interpret(func_node["value"], func_environment)
 
-                return result
+                    tail_call_recursion = False
 
-    return None
+                    cache[call_key] = result
+                    return result
 
 
 def interpret_first(node, environment):
