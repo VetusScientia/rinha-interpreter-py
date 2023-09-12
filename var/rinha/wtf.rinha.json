@@ -1,0 +1,380 @@
+{
+  "name": "var/rinha/wtf.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "pow",
+      "location": {
+        "start": 4,
+        "end": 7,
+        "filename": "var/rinha/wtf.rinha"
+      }
+    },
+    "value": {
+      "kind": "Function",
+      "parameters": [
+        {
+          "text": "a",
+          "location": {
+            "start": 14,
+            "end": 15,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        {
+          "text": "b",
+          "location": {
+            "start": 17,
+            "end": 18,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        }
+      ],
+      "value": {
+        "kind": "If",
+        "condition": {
+          "kind": "Binary",
+          "lhs": {
+            "kind": "Var",
+            "text": "b",
+            "location": {
+              "start": 30,
+              "end": 31,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "op": "Gt",
+          "rhs": {
+            "kind": "Int",
+            "value": 0,
+            "location": {
+              "start": 34,
+              "end": 35,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "location": {
+            "start": 30,
+            "end": 35,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        "then": {
+          "kind": "Binary",
+          "lhs": {
+            "kind": "Var",
+            "text": "a",
+            "location": {
+              "start": 43,
+              "end": 44,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "op": "Mul",
+          "rhs": {
+            "kind": "Call",
+            "callee": {
+              "kind": "Var",
+              "text": "pow",
+              "location": {
+                "start": 47,
+                "end": 50,
+                "filename": "var/rinha/wtf.rinha"
+              }
+            },
+            "arguments": [
+              {
+                "kind": "Var",
+                "text": "a",
+                "location": {
+                  "start": 51,
+                  "end": 52,
+                  "filename": "var/rinha/wtf.rinha"
+                }
+              },
+              {
+                "kind": "Binary",
+                "lhs": {
+                  "kind": "Var",
+                  "text": "b",
+                  "location": {
+                    "start": 54,
+                    "end": 55,
+                    "filename": "var/rinha/wtf.rinha"
+                  }
+                },
+                "op": "Sub",
+                "rhs": {
+                  "kind": "Int",
+                  "value": 1,
+                  "location": {
+                    "start": 58,
+                    "end": 59,
+                    "filename": "var/rinha/wtf.rinha"
+                  }
+                },
+                "location": {
+                  "start": 54,
+                  "end": 59,
+                  "filename": "var/rinha/wtf.rinha"
+                }
+              }
+            ],
+            "location": {
+              "start": 47,
+              "end": 60,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "location": {
+            "start": 43,
+            "end": 60,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        "otherwise": {
+          "kind": "Int",
+          "value": 1,
+          "location": {
+            "start": 72,
+            "end": 73,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        "location": {
+          "start": 27,
+          "end": 75,
+          "filename": "var/rinha/wtf.rinha"
+        }
+      },
+      "location": {
+        "start": 10,
+        "end": 77,
+        "filename": "var/rinha/wtf.rinha"
+      }
+    },
+    "next": {
+      "kind": "Let",
+      "name": {
+        "text": "decpow",
+        "location": {
+          "start": 84,
+          "end": 90,
+          "filename": "var/rinha/wtf.rinha"
+        }
+      },
+      "value": {
+        "kind": "Function",
+        "parameters": [
+          {
+            "text": "n",
+            "location": {
+              "start": 97,
+              "end": 98,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          }
+        ],
+        "value": {
+          "kind": "If",
+          "condition": {
+            "kind": "Binary",
+            "lhs": {
+              "kind": "Var",
+              "text": "n",
+              "location": {
+                "start": 110,
+                "end": 111,
+                "filename": "var/rinha/wtf.rinha"
+              }
+            },
+            "op": "Gt",
+            "rhs": {
+              "kind": "Int",
+              "value": 1,
+              "location": {
+                "start": 114,
+                "end": 115,
+                "filename": "var/rinha/wtf.rinha"
+              }
+            },
+            "location": {
+              "start": 110,
+              "end": 115,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "then": {
+            "kind": "Call",
+            "callee": {
+              "kind": "Var",
+              "text": "pow",
+              "location": {
+                "start": 123,
+                "end": 126,
+                "filename": "var/rinha/wtf.rinha"
+              }
+            },
+            "arguments": [
+              {
+                "kind": "Var",
+                "text": "n",
+                "location": {
+                  "start": 127,
+                  "end": 128,
+                  "filename": "var/rinha/wtf.rinha"
+                }
+              },
+              {
+                "kind": "Call",
+                "callee": {
+                  "kind": "Var",
+                  "text": "decpow",
+                  "location": {
+                    "start": 130,
+                    "end": 136,
+                    "filename": "var/rinha/wtf.rinha"
+                  }
+                },
+                "arguments": [
+                  {
+                    "kind": "Binary",
+                    "lhs": {
+                      "kind": "Var",
+                      "text": "n",
+                      "location": {
+                        "start": 137,
+                        "end": 138,
+                        "filename": "var/rinha/wtf.rinha"
+                      }
+                    },
+                    "op": "Sub",
+                    "rhs": {
+                      "kind": "Int",
+                      "value": 1,
+                      "location": {
+                        "start": 141,
+                        "end": 142,
+                        "filename": "var/rinha/wtf.rinha"
+                      }
+                    },
+                    "location": {
+                      "start": 137,
+                      "end": 142,
+                      "filename": "var/rinha/wtf.rinha"
+                    }
+                  }
+                ],
+                "location": {
+                  "start": 130,
+                  "end": 143,
+                  "filename": "var/rinha/wtf.rinha"
+                }
+              }
+            ],
+            "location": {
+              "start": 123,
+              "end": 144,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "otherwise": {
+            "kind": "Int",
+            "value": 1,
+            "location": {
+              "start": 156,
+              "end": 157,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "location": {
+            "start": 107,
+            "end": 159,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        "location": {
+          "start": 93,
+          "end": 161,
+          "filename": "var/rinha/wtf.rinha"
+        }
+      },
+      "next": {
+        "kind": "Let",
+        "name": {
+          "text": "result",
+          "location": {
+            "start": 168,
+            "end": 174,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        "value": {
+          "kind": "Call",
+          "callee": {
+            "kind": "Var",
+            "text": "decpow",
+            "location": {
+              "start": 177,
+              "end": 183,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "arguments": [
+            {
+              "kind": "Int",
+              "value": 5,
+              "location": {
+                "start": 184,
+                "end": 185,
+                "filename": "var/rinha/wtf.rinha"
+              }
+            }
+          ],
+          "location": {
+            "start": 177,
+            "end": 186,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        "next": {
+          "kind": "Print",
+          "value": {
+            "kind": "Var",
+            "text": "result",
+            "location": {
+              "start": 194,
+              "end": 200,
+              "filename": "var/rinha/wtf.rinha"
+            }
+          },
+          "location": {
+            "start": 188,
+            "end": 201,
+            "filename": "var/rinha/wtf.rinha"
+          }
+        },
+        "location": {
+          "start": 164,
+          "end": 201,
+          "filename": "var/rinha/wtf.rinha"
+        }
+      },
+      "location": {
+        "start": 80,
+        "end": 201,
+        "filename": "var/rinha/wtf.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 201,
+      "filename": "var/rinha/wtf.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 201,
+    "filename": "var/rinha/wtf.rinha"
+  }
+}

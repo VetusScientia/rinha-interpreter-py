@@ -1,0 +1,192 @@
+{
+  "name": "var/rinha/increment.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "generateIncrement",
+      "location": {
+        "start": 4,
+        "end": 21,
+        "filename": "var/rinha/increment.rinha"
+      }
+    },
+    "value": {
+      "kind": "Function",
+      "parameters": [
+        {
+          "text": "increment",
+          "location": {
+            "start": 27,
+            "end": 36,
+            "filename": "var/rinha/increment.rinha"
+          }
+        }
+      ],
+      "value": {
+        "kind": "Function",
+        "parameters": [
+          {
+            "text": "x",
+            "location": {
+              "start": 50,
+              "end": 51,
+              "filename": "var/rinha/increment.rinha"
+            }
+          }
+        ],
+        "value": {
+          "kind": "Binary",
+          "lhs": {
+            "kind": "Var",
+            "text": "x",
+            "location": {
+              "start": 66,
+              "end": 67,
+              "filename": "var/rinha/increment.rinha"
+            }
+          },
+          "op": "Add",
+          "rhs": {
+            "kind": "Var",
+            "text": "increment",
+            "location": {
+              "start": 70,
+              "end": 79,
+              "filename": "var/rinha/increment.rinha"
+            }
+          },
+          "location": {
+            "start": 66,
+            "end": 79,
+            "filename": "var/rinha/increment.rinha"
+          }
+        },
+        "location": {
+          "start": 47,
+          "end": 85,
+          "filename": "var/rinha/increment.rinha"
+        }
+      },
+      "location": {
+        "start": 24,
+        "end": 87,
+        "filename": "var/rinha/increment.rinha"
+      }
+    },
+    "next": {
+      "kind": "Let",
+      "name": {
+        "text": "incrementBy5",
+        "location": {
+          "start": 94,
+          "end": 106,
+          "filename": "var/rinha/increment.rinha"
+        }
+      },
+      "value": {
+        "kind": "Call",
+        "callee": {
+          "kind": "Var",
+          "text": "generateIncrement",
+          "location": {
+            "start": 109,
+            "end": 126,
+            "filename": "var/rinha/increment.rinha"
+          }
+        },
+        "arguments": [
+          {
+            "kind": "Int",
+            "value": 5,
+            "location": {
+              "start": 127,
+              "end": 128,
+              "filename": "var/rinha/increment.rinha"
+            }
+          }
+        ],
+        "location": {
+          "start": 109,
+          "end": 129,
+          "filename": "var/rinha/increment.rinha"
+        }
+      },
+      "next": {
+        "kind": "Let",
+        "name": {
+          "text": "result",
+          "location": {
+            "start": 135,
+            "end": 141,
+            "filename": "var/rinha/increment.rinha"
+          }
+        },
+        "value": {
+          "kind": "Call",
+          "callee": {
+            "kind": "Var",
+            "text": "incrementBy5",
+            "location": {
+              "start": 144,
+              "end": 156,
+              "filename": "var/rinha/increment.rinha"
+            }
+          },
+          "arguments": [
+            {
+              "kind": "Int",
+              "value": 10,
+              "location": {
+                "start": 157,
+                "end": 159,
+                "filename": "var/rinha/increment.rinha"
+              }
+            }
+          ],
+          "location": {
+            "start": 144,
+            "end": 160,
+            "filename": "var/rinha/increment.rinha"
+          }
+        },
+        "next": {
+          "kind": "Print",
+          "value": {
+            "kind": "Var",
+            "text": "result",
+            "location": {
+              "start": 168,
+              "end": 174,
+              "filename": "var/rinha/increment.rinha"
+            }
+          },
+          "location": {
+            "start": 162,
+            "end": 175,
+            "filename": "var/rinha/increment.rinha"
+          }
+        },
+        "location": {
+          "start": 131,
+          "end": 175,
+          "filename": "var/rinha/increment.rinha"
+        }
+      },
+      "location": {
+        "start": 90,
+        "end": 175,
+        "filename": "var/rinha/increment.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 175,
+      "filename": "var/rinha/increment.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 175,
+    "filename": "var/rinha/increment.rinha"
+  }
+}
