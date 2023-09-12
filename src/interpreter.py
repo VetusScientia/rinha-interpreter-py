@@ -124,6 +124,7 @@ def interpret_call(node, environment):
                     tail_call_recursion = False
 
                     cache[call_key] = result
+
                     return result
 
 
