@@ -1,0 +1,20 @@
+{
+  "name": "ata.rinha",
+  "expression": {
+    "kind": "Function",
+    "parameters": [
+      {
+        "kind": "Parameter",
+        "text": "x",
+        "location": 0
+      }
+    ],
+    "value": {
+      "kind": "Var",
+      "text": "x",
+      "location": 0
+    },
+    "location": 0
+  },
+  "location": 0
+}

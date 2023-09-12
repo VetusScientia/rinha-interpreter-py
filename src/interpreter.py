@@ -1,21 +1,31 @@
 from format_output import *
 
+
 cache = {}
+global_environment = {}
+
 
 class Closure:
     def __init__(self, func_node, environment):
         self.func_node = func_node
         self.environment = environment
 
+    def __str__(self):
+        return "<#closure>"
+
+
 def interpret_int(node, environment):
     value = node.get("value", 0)
     return value
 
+
 def interpret_str(node, environment):
     return node["value"]
 
+
 def interpret_bool(node, environment):
     return node["value"]
+
 
 def interpret_binary(node, environment):
     lhs = interpret(node.get("lhs", node), environment)
@@ -44,16 +54,19 @@ def interpret_binary(node, environment):
     else:
         raise RinhaError(f"Unsupported operator: {op}")
 
+
 def interpret_let(node, environment):
     name = node["name"]["text"]
-    value = interpret(node["value"], environment)
     new_environment = environment.copy()
+    value = interpret(node["value"], new_environment)
     new_environment[name] = value
     return interpret(node.get("next", node), new_environment)
+
 
 def interpret_if(node, environment):
     condition = interpret(node["condition"], environment)
     return interpret(node["then"] if condition else node["otherwise"], environment)
+
 
 def interpret_print(node, environment):
     value = interpret(node["value"], environment)
@@ -69,22 +82,32 @@ def interpret_function(node, environment):
 def interpret_call(node, environment):
     callee = interpret(node["callee"], environment)
     args = [interpret(arg, environment) for arg in node["arguments"]]
-    func_node = callee.func_node if isinstance(callee, Closure) else callee
-    call_key = (func_node["kind"], tuple(args))
+
+    if isinstance(callee, Closure):
+        func_environment = callee.environment.copy()
+        for param, arg in zip(callee.func_node["parameters"], args):
+            func_environment[param["text"]] = arg
+        result = interpret(callee.func_node["value"], func_environment)
+        return result
+
+    call_key = (callee["kind"], tuple(args))
 
     if call_key in cache:
         return cache[call_key]
     else:
-        if func_node["kind"] == "Function":
-            if "name" not in func_node:
+        if callee["kind"] == "Function":
+            if "name" not in callee:
                 func_environment = environment.copy()
-                for param, arg in zip(func_node["parameters"], args):
+                for param, arg in zip(callee["parameters"], args):
                     func_environment[param["text"]] = arg
-                result = interpret(func_node["value"], func_environment)
+                result = interpret(callee["value"], func_environment)
 
                 cache[call_key] = result
 
                 return result
+
+    return None
+
 
 def interpret_first(node, environment):
     tuple_value = interpret(node["value"], environment)
@@ -93,6 +116,7 @@ def interpret_first(node, environment):
     else:
         raise RinhaError(f"Expected a tuple, got {type(tuple_value).__name__}")
 
+
 def interpret_second(node, environment):
     tuple_value = interpret(node["value"], environment)
     if isinstance(tuple_value, tuple):
@@ -100,10 +124,12 @@ def interpret_second(node, environment):
     else:
         raise RinhaError(f"Expected a tuple, got {type(tuple_value).__name__}")
 
+
 def interpret_tuple(node, environment):
     first = interpret(node["first"], environment)
     second = interpret(node["second"], environment)
     return (first, second)
+
 
 def interpret_var(node, environment):
     var_name = node["text"]
@@ -112,8 +138,10 @@ def interpret_var(node, environment):
     else:
         raise RinhaError(f"Variable '{var_name}' not defined")
 
+
 def interpret_parameter(node, environment):
     return node
+
 
 def interpret(node, environment):
     try:

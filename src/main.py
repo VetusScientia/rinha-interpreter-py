@@ -1,6 +1,7 @@
 import argparse
 from interpreter import *
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Interpreter for Rinha language')
     parser.add_argument('-s', '--start', metavar='filename', type=str, help='Starts parsing from a JSON file')

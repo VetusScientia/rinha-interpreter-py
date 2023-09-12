@@ -4,6 +4,7 @@ class RinhaError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+
 def format_output(value):
     if isinstance(value, str):
         return value
@@ -19,6 +20,7 @@ def format_output(value):
         return json.dumps(value)
     else:
         raise RinhaError(f"Invalid output format for value: {value}")
+
 
 def load_json_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
