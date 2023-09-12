@@ -19,7 +19,6 @@ Cargo.lock
 
 .vscode
 test/
-**/**/*.txt
 
 # Exec
 
