@@ -1,15 +1,11 @@
+import numpy as np
 from format_output import *
+
 
 cache = {}
 global_environment = {}
 
-class Closure:
-    def __init__(self, func_node, environment):
-        self.func_node = func_node
-        self.environment = environment
-
-    def __str__(self):
-        return "<#closure>"
+tail_call_recursion = False
 
 
 class CustomStack:
@@ -26,9 +22,12 @@ class CustomStack:
         return len(self.frames) == 0
 
 
+custom_stack = CustomStack()
+
+
 def interpret_int(node, environment):
     value = node.get("value", 0)
-    return value
+    return np.int32(value)
 
 
 def interpret_str(node, environment):
@@ -86,46 +85,71 @@ def interpret_print(node, environment):
         output = ", ".join(str(val) for val in output)
     return output
 
-tail_call_recursion = False
 
-def interpret_function(node, environment):
+def interpret_closure(node, environment):
     return Closure(node, environment)
 
-custom_stack = CustomStack()
+
+def optimize_tail_call(func_node, func_environment, args):
+    global tail_call_recursion
+    if func_node == tail_call_recursion:
+        while True:
+            result = interpret(func_node["value"], func_environment)
+            if not callable(result):
+                return result
+    else:
+        custom_stack.push(func_node, func_environment)
+        while not custom_stack.is_empty():
+            func_node, func_environment = custom_stack.pop()
+            result = interpret(func_node["value"], func_environment)
+
+        tail_call_recursion = False
+
+        return result
+
+
+def interpret_function(node, environment):
+    return interpret_closure(node, environment)
+
 
 def interpret_call(node, environment):
     global tail_call_recursion
     callee = interpret(node["callee"], environment)
     args = [interpret(arg, environment) for arg in node["arguments"]]
 
-    func_node = callee.func_node if isinstance(callee, Closure) else callee
-    call_key = (func_node["kind"], tuple(args))
+    if isinstance(callee, Closure):
+        func_node = callee.func_node
+        func_environment = callee.environment.copy()
+        for param, arg in zip(func_node["parameters"], args):
+            func_environment[param["text"]] = arg
 
-    if call_key in cache:
-        return cache[call_key]
+        if tail_call_recursion and func_node == tail_call_recursion:
+            return optimize_tail_call(func_node, func_environment, args)
+        else:
+            custom_stack.push(func_node, func_environment)
+            while not custom_stack.is_empty():
+                func_node, func_environment = custom_stack.pop()
+                result = interpret(func_node["value"], func_environment)
+
+            tail_call_recursion = False
+
+            return result
     else:
-        if func_node["kind"] == "Function":
-            if "name" not in func_node:
+        call_key = (callee["kind"], tuple(args))
+
+        if call_key in cache:
+            return cache[call_key]
+        else:
+            if callee["kind"] == "Function":
                 func_environment = environment.copy()
-                for param, arg in zip(func_node["parameters"], args):
+                for param, arg in zip(callee["parameters"], args):
                     func_environment[param["text"]] = arg
 
-                if tail_call_recursion and func_node == tail_call_recursion:
-                    while True:
-                        result = interpret(func_node["value"], func_environment)
-                        if not callable(result):
-                            return result
-                else:
-                    custom_stack.push(func_node, func_environment)
-                    while not custom_stack.is_empty():
-                        func_node, func_environment = custom_stack.pop()
-                        result = interpret(func_node["value"], func_environment)
+                result = interpret(callee["value"], func_environment)
 
-                    tail_call_recursion = False
+                cache[call_key] = result
 
-                    cache[call_key] = result
-
-                    return result
+                return result
 
 
 def interpret_first(node, environment):

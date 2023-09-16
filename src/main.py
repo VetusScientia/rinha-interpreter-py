@@ -25,3 +25,4 @@ if __name__ == "__main__":
             print(output)
     else:
         print("Use 'rinha -h' or 'rinha --help' to get help.")
+

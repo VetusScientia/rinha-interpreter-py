@@ -8,11 +8,11 @@ let fibonacci = fn (n) => {
     };
     
     if (n < 2) {
-        print("O " + n + "º termo da sequência de Fibonacci é: " + n)
+        print("Fib: " + n)
     } else {
         let result = fib(n, 0, 1);
-        print("O " + n + "º termo da sequência de Fibonacci é: " + result)
+        print("Fib: " + result)
     }
 };
 
-fibonacci(300)
+fibonacci(40)

@@ -10,5 +10,5 @@ let decpow = fn (n) => {
   } else { 1 }
 };
 
-let result = decpow(5);
+let result = decpow(4);
 print(result)

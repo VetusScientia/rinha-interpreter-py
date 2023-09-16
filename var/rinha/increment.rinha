@@ -6,4 +6,4 @@ let generateIncrement = fn(increment) => {
 
 let incrementBy5 = generateIncrement(5);
 let result = incrementBy5(10);
-print(result)  // The result will be 15
+print(result)
