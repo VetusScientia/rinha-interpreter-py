@@ -10,9 +10,6 @@ class Closure:
         self.func_node = func_node
         self.environment = environment
 
-    def __str__(self):
-        return "<#closure>"
-
 
 def format_output(value):
     if isinstance(value, str):

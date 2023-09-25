@@ -1,9 +1,9 @@
-FROM python:3.9
+FROM python:3.9-ubuntu
 
 WORKDIR /app
 
 COPY src ./
-COPY ./var/rinha/fib.rinha.json /var/rinha/fib.rinha.json
+COPY source.rinha.json /var/rinha/source.rinha.json
 COPY requirements.txt ./
 
-CMD ["python", "main.py", "-s", "/var/rinha/fib.rinha.json"]
+CMD ["python", "main.py", "-s", "/var/rinha/source.rinha.json"]
