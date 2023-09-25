@@ -22,6 +22,8 @@ class BinaryOp(Enum):
 def add(x, y):
     if type(x) == str or type(y) == str:
         return str(x) + str(y)
+    if x is None or y is None:
+        return None
     return x + y
 
 def sub(x, y):
