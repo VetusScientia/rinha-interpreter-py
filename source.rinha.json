@@ -1,0 +1,26 @@
+{
+    "name": "var/rinha/hello.rinha",
+    "expression": {
+      "kind": "Print",
+      "value": {
+        "kind": "Str",
+        "value": "Dança gatinho",
+        "location": {
+          "start": 6,
+          "end": 22,
+          "filename": "var/rinha/hello.rinha"
+        }
+      },
+      "location": {
+        "start": 0,
+        "end": 23,
+        "filename": "var/rinha/hello.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 23,
+      "filename": "var/rinha/hello.rinha"
+    }
+  }
+  
