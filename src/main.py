@@ -10,7 +10,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.version:
-        print("Rinha Interpreter v1.1.5")
+        print("Rinha Interpreter v1.1.6")
     elif args.start:
         try:
             filename = args.start
@@ -25,4 +25,3 @@ if __name__ == "__main__":
             print(output)
     else:
         print("Use 'rinha -h' or 'rinha --help' to get help.")
-

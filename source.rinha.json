@@ -1,26 +1,590 @@
-{
-    "name": "var/rinha/hello.rinha",
-    "expression": {
-      "kind": "Print",
-      "value": {
-        "kind": "Str",
-        "value": "Dança gatinho",
-        "location": {
-          "start": 6,
-          "end": 22,
-          "filename": "var/rinha/hello.rinha"
-        }
-      },
-      "location": {
-        "start": 0,
-        "end": 23,
-        "filename": "var/rinha/hello.rinha"
-      }
-    },
-    "location": {
-      "start": 0,
-      "end": 23,
-      "filename": "var/rinha/hello.rinha"
+import numpy as np
+import ujson
+import sys
+import argparse
+
+sys.setrecursionlimit(100000)
+
+class RinhaError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class Closure:
+    def __init__(self, func_node, environment):
+        self.func_node = func_node
+        self.environment = environment
+
+
+def format_output(value):
+    if isinstance(value, str):
+        return value
+    elif isinstance(value, bool):
+        return "true" if value else "false"
+    elif isinstance(value, Closure):
+        return "<#closure>"
+    elif isinstance(value, tuple):
+        return f"({format_output(value[0])}, {format_output(value[1])})"
+    elif isinstance(value, dict):
+        return ujson.dumps(value)
+    elif value is None:
+        return "null"
+    else:
+        return value
+
+
+def load_json_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return ujson.load(file)
+
+
+cache = {}
+global_environment = {}
+
+tail_call_recursion = False
+
+
+class CustomStack:
+    def __init__(self):
+        self.frames = []
+
+    def push(self, func_node, environment):
+        self.frames.append((func_node, environment))
+
+    def pop(self):
+        return self.frames.pop()
+
+    def is_empty(self):
+        return len(self.frames) == 0
+
+
+custom_stack = CustomStack()
+
+
+class Var:
+    def __init__(self, text, location):
+        self.kind = "Var"
+        self.text = text
+        self.location = location
+
+    def execute(self, **kwargs):
+        return kwargs.get("namespace", {}).get(self.text)
+
+
+class Parameter:
+    def __init__(self, text, location):
+        self.text = text
+        self.location = location
+
+
+class HashableDict(dict):
+    def __hash__(self):
+        return hash(frozenset(self))
+
+
+class Function:
+    def __init__(self, parameters, value, location):
+        self.kind = "Function"
+        self.parameters = parameters
+        self.value = value
+        self.location = location
+
+    def execute(self, **kwargs):
+        global_namespace = kwargs.get("namespace", {})
+        parameters = list(map(lambda parameter: parameter.text, self.parameters))
+        total_parameters = len(parameters)
+
+        @cache
+        def function(*function_args, **function_kwargs):
+            total_arguments = len(function_args)
+
+            if total_arguments != total_parameters:
+                raise Exception(
+                    f"Expected {total_parameters} arguments, got {total_arguments}"
+                )
+
+            local_namespace = function_kwargs.get("namespace", {})
+            function_namespace = dict(zip(parameters, function_args))
+            namespace = {**global_namespace, **local_namespace, **function_namespace}
+
+            return self.value.execute(namespace=HashableDict(namespace))
+
+        return function
+
+
+class Call:
+    def __init__(self, callee, arguments, location):
+        self.kind = "Call"
+        self.callee = callee
+        self.arguments = arguments
+        self.location = location
+
+    def execute(self, **kwargs):
+        arguments = list(
+            map(lambda argument: argument.execute(**kwargs), self.arguments)
+        )
+
+        return self.callee.execute(**kwargs)(*arguments, **kwargs)
+
+
+class Let:
+    def __init__(self, name, value, next_node, location):
+        self.kind = "Let"
+        self.name = name
+        self.value = value
+        self.next = next_node
+        self.location = location
+
+    def execute(self, **kwargs):
+        global_namespace = kwargs.get("namespace", {})
+        local_namespace = {self.name.text: self.value.execute(**kwargs)}
+        namespace = {**global_namespace, **local_namespace}
+
+        return self.next.execute(namespace=HashableDict(namespace))
+
+
+class Str:
+    def __init__(self, value, location):
+        self.kind = "Str"
+        self.value = value
+        self.location = location
+
+    def execute(self, **kwargs):
+        return str(self.value)
+
+
+class Int:
+    def __init__(self, value, location):
+        self.kind = "Int"
+        self.value = value
+        self.location = location
+
+    def execute(self, **kwargs):
+        return int(self.value)
+
+
+class BinaryOp(Enum):
+    Add = "Add"
+    Sub = "Sub"
+    Mul = "Mul"
+    Div = "Div"
+    Rem = "Rem"
+    Eq = "Eq"
+    Neq = "Neq"
+    Lt = "Lt"
+    Gt = "Gt"
+    Lte = "Lte"
+    Gte = "Gte"
+    And = "And"
+    Or = "Or"
+
+
+class Bool:
+    def __init__(self, value, location):
+        self.kind = "Bool"
+        self.value = value
+        self.location = location
+
+    def execute(self, **kwargs):
+        return bool(self.value)
+
+
+class If:
+    def __init__(self, condition, then, otherwise, location):
+        self.kind = "If"
+        self.condition = condition
+        self.then = then
+        self.otherwise = otherwise
+        self.location = location
+
+    def execute(self, **kwargs):
+        if self.condition.execute(**kwargs):
+            return self.then.execute(**kwargs)
+
+        return self.otherwise.execute(**kwargs)
+
+
+class Binary:
+    def __init__(self, lhs, op, rhs, location):
+        self.kind = "Binary"
+        self.lhs = lhs
+        self.op = op
+        self.rhs = rhs
+        self.location = location
+
+    def execute(self, **kwargs):
+        operator = SUPPORTED_BINARY_OPERATIONS[self.op.name]
+        left = self.lhs.execute(**kwargs)
+        right = self.rhs.execute(**kwargs)
+
+        return operator(left, right)
+
+
+class Tuple:
+    def __init__(self, first, second, location):
+        self.kind = "Tuple"
+        self.first = first
+        self.second = second
+        self.location = location
+
+    def execute(self, **kwargs):
+        return self.first.execute(**kwargs), self.second.execute(**kwargs)
+
+
+class First:
+    def __init__(self, value, location):
+        self.kind = "First"
+        self.value = value
+        self.location = location
+
+    def execute(self, **kwargs):
+        if not isinstance(self.value, Tuple):
+            raise RuntimeError(f"Expected a tuple, given {type(self.value)}")
+
+        first, _ = self.value.execute(**kwargs)
+
+        return first
+
+
+class Second:
+    def __init__(self, value, location):
+        self.kind = "Second"
+        self.value = value
+        self.location = location
+
+    def execute(self, **kwargs):
+        if not isinstance(self.value, Tuple):
+            raise RuntimeError(f"Expected a tuple, given {type(self.value)}")
+
+        _, second = self.value.execute(**kwargs)
+
+        return second
+
+
+class Print:
+    def __init__(self, value, location):
+        self.kind = "Print"
+        self.value = value
+        self.location = location
+
+    def execute(self, **kwargs):
+        result = self.value.execute(**kwargs)
+
+        if isinstance(self.value, Function):
+            print("<#closure>")
+        else:
+            print(result)
+
+        return result
+
+
+class File:
+    def __init__(self, expression, location):
+        self.name = "File"
+        self.expression = expression
+        self.location = location
+
+    def execute(self, **kwargs):
+        return self.expression.execute()
+
+
+Term = (
+    Var
+    | Function
+    | Call
+    | Let
+    | Str
+    | Int
+    | Bool
+    | If
+    | Binary
+    | Tuple
+    | First
+    | Second
+    | Print
+)
+
+
+SUPPORTED_BINARY_OPERATIONS = {
+    BinaryOp.Add.name: binary_operations.add,
+    BinaryOp.Sub.name: binary_operations.sub,
+    BinaryOp.Mul.name: binary_operations.mul,
+    BinaryOp.Div.name: binary_operations.div,
+    BinaryOp.Rem.name: binary_operations.rem,
+    BinaryOp.Eq.name: binary_operations.eq,
+    BinaryOp.Neq.name: binary_operations.neq,
+    BinaryOp.Lt.name: binary_operations.lt,
+    BinaryOp.Gt.name: binary_operations.gt,
+    BinaryOp.Lte.name: binary_operations.lte,
+    BinaryOp.Gte.name: binary_operations.gte,
+    BinaryOp.And.name: binary_operations.and_,
+    BinaryOp.Or.name: binary_operations.or_,
+}
+
+
+class Utils:
+    @staticmethod
+    def identity(x):
+        return x
+
+    @staticmethod
+    def with_parameters(object_data):
+        parameters = object_data.get("parameters", [])
+        mapped_parameters = list(map(lambda parameter: Parameter(**parameter), parameters))
+
+        return {**object_data, "parameters": mapped_parameters}
+
+    @staticmethod
+    def with_parameter(object_data):
+        parameter = object_data["name"]
+        mapped_parameter = Parameter(**parameter)
+
+        return {**object_data, "name": mapped_parameter}
+
+    @staticmethod
+    def with_binary_operation(object_data):
+        op = object_data["op"]
+        mapped_op = BinaryOp(op)
+
+        return {**object_data, "op": mapped_op}
+
+
+SUPPORTED_NODES = {
+    Var.kind: (Var, Utils.identity),
+    Function.kind: (Function, Utils.with_parameters),
+    Call.kind: (Call, Utils.identity),
+    Let.kind: (Let, Utils.with_parameter),
+    Str.kind: (Str, Utils.identity),
+    Int.kind: (Int, Utils.identity),
+    Bool.kind: (Bool, Utils.identity),
+    If.kind: (If, Utils.identity),
+    Binary.kind: (Binary, Utils.with_binary_operation),
+    Tuple.kind: (Tuple, Utils.identity),
+    First.kind: (First, Utils.identity),
+    Second.kind: (Second, Utils.identity),
+    Print.kind: (Print, Utils.identity),
+}
+
+
+def to_ast_node(object_data):
+    if kind := object_data.get("kind"):
+        if node_handler := SUPPORTED_NODES.get(kind):
+            node, handler = node_handler
+            node_arguments = handler(object_data)
+
+            return node(**node_arguments)
+
+    return object_data
+
+
+def interpret_int(node, environment):
+    value = node.get("value", 0)
+    return np.int32(value)
+
+
+def interpret_str(node, environment):
+    return node["value"]
+
+
+def interpret_bool(node, environment):
+    return node["value"]
+
+
+def interpret_binary(node, environment):
+    lhs = interpret(node.get("lhs", node), environment)
+    rhs = interpret(node.get("rhs", node), environment)
+    op = node["op"]
+    operators = {
+        "Add": lambda x, y: str(x) + str(y) if isinstance(x, str) or isinstance(y, str) else x + y,
+        "Sub": lambda x, y: x - y,
+        "Mul": lambda x, y: x * y,
+        "Div": lambda x, y: x // y if y != 0 else None,
+        "Rem": lambda x, y: x % y if y != 0 else None,
+        "Eq": lambda x, y: x == y,
+        "Neq": lambda x, y: x != y,
+        "Lt": lambda x, y: x < y,
+        "Gt": lambda x, y: x > y,
+        "Lte": lambda x, y: x <= y,
+        "Gte": lambda x, y: x >= y,
+        "And": lambda x, y: x and y,
+        "Or": lambda x, y: x or y
     }
-  }
-  
+    if op == "Div" and rhs == 0:
+        raise RinhaError("Division by zero")
+    if op in operators:
+        return operators[op](lhs, rhs)
+    else:
+        raise RinhaError(f"Unsupported operator: {op}")
+
+
+def interpret_let(node, environment):
+    name = node["name"]["text"]
+    new_environment = environment.copy()
+    value = interpret(node["value"], new_environment)
+    new_environment[name] = value
+    return interpret(node.get("next", node), new_environment)
+
+
+def interpret_if(node, environment):
+    condition = interpret(node["condition"], environment)
+    return interpret(node["then"] if condition else node["otherwise"], environment)
+
+
+def interpret_print(node, environment):
+    value = interpret(node["value"], environment)
+    output = format_output(value)
+    if isinstance(output, tuple):
+        output = ", ".join(str(val) for val in output)
+    return output
+
+
+def interpret_closure(node, environment):
+    return Closure(node, environment)
+
+
+def optimize_tail_call(func_node, func_environment, args):
+    global tail_call_recursion
+    if func_node == tail_call_recursion:
+        while True:
+            result = interpret(func_node["value"], func_environment)
+            if not callable(result):
+                return result
+    else:
+        custom_stack.push(func_node, func_environment)
+        while not custom_stack.is_empty():
+            func_node, func_environment = custom_stack.pop()
+            result = interpret(func_node["value"], func_environment)
+
+        tail_call_recursion = False
+
+        return result
+
+
+def interpret_function(node, environment):
+    return interpret_closure(node, environment)
+
+
+def interpret_call(node, environment):
+    global tail_call_recursion
+    callee = interpret(node["callee"], environment)
+    args = [interpret(arg, environment) for arg in node["arguments"]]
+
+    if isinstance(callee, Closure):
+        func_node = callee.func_node
+        func_environment = callee.environment.copy()
+        for param, arg in zip(func_node["parameters"], args):
+            func_environment[param["text"]] = arg
+
+        if tail_call_recursion and func_node == tail_call_recursion:
+            return optimize_tail_call(func_node, func_environment, args)
+        else:
+            custom_stack.push(func_node, func_environment)
+            while not custom_stack.is_empty():
+                func_node, func_environment = custom_stack.pop()
+                result = interpret(func_node["value"], func_environment)
+
+            tail_call_recursion = False
+
+            return result
+    else:
+        call_key = (callee["kind"], tuple(args))
+
+        if call_key in cache:
+            return cache[call_key]
+        else:
+            if callee["kind"] == "Function":
+                func_environment = environment.copy()
+                for param, arg in zip(callee["parameters"], args):
+                    func_environment[param["text"]] = arg
+
+                result = interpret(callee["value"], func_environment)
+
+                cache[call_key] = result
+
+                return result
+
+
+def interpret_first(node, environment):
+    tuple_value = interpret(node["value"], environment)
+    if isinstance(tuple_value, tuple):
+        return tuple_value[0]
+    else:
+        raise RinhaError(f"Expected a tuple, got {type(tuple_value).__name__}")
+
+
+def interpret_second(node, environment):
+    tuple_value = interpret(node["value"], environment)
+    if isinstance(tuple_value, tuple):
+        return tuple_value[1]
+    else:
+        raise RinhaError(f"Expected a tuple, got {type(tuple_value).__name__}")
+
+
+def interpret_tuple(node, environment):
+    first = interpret(node["first"], environment)
+    second = interpret(node["second"], environment)
+    return (first, second)
+
+
+def interpret_var(node, environment):
+    var_name = node["text"]
+    if var_name in environment:
+        return environment[var_name]
+    else:
+        raise RinhaError(f"Variable '{var_name}' not defined")
+
+
+def interpret_parameter(node, environment):
+    return node
+
+
+def interpret(node, environment):
+    try:
+        if isinstance(node, dict):
+            kind = node.get("kind")
+            interpreter = {
+                "Int": interpret_int,
+                "Str": interpret_str,
+                "Bool": interpret_bool,
+                "Binary": interpret_binary,
+                "Let": interpret_let,
+                "If": interpret_if,
+                "Print": interpret_print,
+                "Function": interpret_function,
+                "Call": interpret_call,
+                "First": interpret_first,
+                "Second": interpret_second,
+                "Tuple": interpret_tuple,
+                "Var": interpret_var,
+                "Parameter": interpret_parameter
+            }
+            result = interpreter[kind](node, environment) if kind in interpreter else None
+            return result if result is not None else None
+        return node
+    except RinhaError as e:
+        print(f"RinhaError: {e}")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Interpreter for Rinha language')
+    parser.add_argument('-s', '--start', metavar='filename', type=str, help='Starts parsing from a JSON file')
+    parser.add_argument('-v', '--version', action='store_true', help='Displays the interpreter version')
+
+    args = parser.parse_args()
+
+    if args.version:
+        print("Rinha Interpreter v1.1.5")
+    elif args.start:
+        try:
+            filename = args.start
+
+            if not filename.endswith('.json'):
+                raise RinhaError("The file must have the .json extension")
+        except Exception as e:
+            print(f"Error: {e}")
+        else:
+            data = load_json_file(filename)
+            output = interpret(data["expression"], {})
+            print(output)
+    else:
+        print("Use 'rinha -h' or 'rinha --help' to get help.")

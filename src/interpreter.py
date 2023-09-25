@@ -1,30 +1,6 @@
 import numpy as np
-from functools import lru_cache
-from format_output import *
-
-
-cache = {}
-global_environment = {}
-
-tail_call_recursion = False
-
-
-class CustomStack:
-    def __init__(self):
-        self.frames = []
-
-    def push(self, func_node, environment):
-        self.frames.append((func_node, environment))
-
-    def pop(self):
-        return self.frames.pop()
-
-    def is_empty(self):
-        return len(self.frames) == 0
-
-
-custom_stack = CustomStack()
-
+import ujson
+from utils import *
 
 def interpret_int(node, environment):
     value = node.get("value", 0)
@@ -44,19 +20,19 @@ def interpret_binary(node, environment):
     rhs = interpret(node.get("rhs", node), environment)
     op = node["op"]
     operators = {
-        "Add": lambda x, y: str(x) + str(y) if isinstance(x, str) or isinstance(y, str) else x + y,
-        "Sub": lambda x, y: x - y,
-        "Mul": lambda x, y: x * y,
-        "Div": lambda x, y: x // y if y != 0 else None,
-        "Rem": lambda x, y: x % y if y != 0 else None,
-        "Eq": lambda x, y: x == y,
-        "Neq": lambda x, y: x != y,
-        "Lt": lambda x, y: x < y,
-        "Gt": lambda x, y: x > y,
-        "Lte": lambda x, y: x <= y,
-        "Gte": lambda x, y: x >= y,
-        "And": lambda x, y: x and y,
-        "Or": lambda x, y: x or y
+        "Add": add,
+        "Sub": sub,
+        "Mul": mul,
+        "Div": div,
+        "Rem": rem,
+        "Eq": eq,
+        "Neq": neq,
+        "Lt": lt,
+        "Gt": gt,
+        "Lte": lte,
+        "Gte": gte,
+        "And": and_,
+        "Or": or_
     }
     if op == "Div" and rhs == 0:
         raise RinhaError("Division by zero")
@@ -212,3 +188,4 @@ def interpret(node, environment):
         return node
     except RinhaError as e:
         print(f"RinhaError: {e}")
+

@@ -18,8 +18,7 @@ Cargo.lock
 **/__pycache__
 
 .vscode
-test/
-tests.sh
+
 
 # Exec
 
