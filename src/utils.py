@@ -1,23 +1,7 @@
 import ujson
-import sys
 from enum import Enum
 
-
-class BinaryOp(Enum):
-    Add = "Add"
-    Sub = "Sub"
-    Mul = "Mul"
-    Div = "Div"
-    Rem = "Rem"
-    Eq = "Eq"
-    Neq = "Neq"
-    Lt = "Lt"
-    Gt = "Gt"
-    Lte = "Lte"
-    Gte = "Gte"
-    And = "And"
-    Or = "Or"
-
+tail_call_recursion = False
 
 def add(x, y):
     if type(x) == str or type(y) == str:
@@ -73,8 +57,6 @@ class Closure:
         self.func_node = func_node
         self.environment = environment
 
-tail_call_recursion = False
-
 
 class CustomStack:
     def __init__(self):
@@ -105,6 +87,23 @@ class CustomStack:
 
     def is_empty(self):
         return len(self.frames) == 0
+
+
+binary_operators = {
+    "Add": lambda x, y: str(x) + str(y) if type(x) == str or type(y) == str else x + y,
+    "Sub": lambda x, y: x - y,
+    "Mul": lambda x, y: x * y,
+    "Div": lambda x, y: int(x / y) if y != 0 else None,
+    "Rem": lambda x, y: x % y,
+    "Eq": lambda x, y: x == y,
+    "Neq": lambda x, y: x != y,
+    "Lt": lambda x, y: x < y,
+    "Gt": lambda x, y: x > y,
+    "Lte": lambda x, y: x <= y,
+    "Gte": lambda x, y: x >= y,
+    "And": lambda x, y: x and y,
+    "Or": lambda x, y: x or y
+}
 
 
 def format_output(value):

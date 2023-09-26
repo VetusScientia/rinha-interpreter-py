@@ -2,7 +2,9 @@ import numpy as np
 import ujson
 from utils import *
 
+
 cache = {}
+global_environment = {}
 
 def interpret_int(node, environment):
     value = node.get("value", 0)
@@ -21,35 +23,18 @@ def interpret_binary(node, environment):
     lhs = interpret(node.get("lhs", node), environment)
     rhs = interpret(node.get("rhs", node), environment)
     op = node["op"]
-    operators = {
-        "Add": add,
-        "Sub": sub,
-        "Mul": mul,
-        "Div": div,
-        "Rem": rem,
-        "Eq": eq,
-        "Neq": neq,
-        "Lt": lt,
-        "Gt": gt,
-        "Lte": lte,
-        "Gte": gte,
-        "And": and_,
-        "Or": or_
-    }
-    if op == "Div" and rhs == 0:
-        raise RinhaError("Division by zero")
-    if op in operators:
-        return operators[op](lhs, rhs)
+
+    if op in binary_operators:
+        return binary_operators[op](lhs, rhs)
     else:
         raise RinhaError(f"Unsupported operator: {op}")
 
 
 def interpret_let(node, environment):
     name = node["name"]["text"]
-    new_environment = environment.copy()
-    value = interpret(node["value"], new_environment)
-    new_environment[name] = value
-    return interpret(node.get("next", node), new_environment)
+    value = interpret(node["value"], environment)
+    global_environment[name] = value
+    return interpret(node.get("next", node), environment)
 
 
 def interpret_if(node, environment):
@@ -89,6 +74,9 @@ def interpret_call(node, environment):
                 func_environment = environment.copy()
                 for param, arg in zip(func_node["parameters"], args):
                     func_environment[param["text"]] = arg
+
+                for param, arg in zip(func_node["parameters"], args):
+                    global_environment[param["text"]] = arg
 
                 if tail_call_recursion and func_node == tail_call_recursion:
                     while True:
@@ -133,6 +121,8 @@ def interpret_var(node, environment):
     var_name = node["text"]
     if var_name in environment:
         return environment[var_name]
+    elif var_name in global_environment:  # Verificando no ambiente global
+        return global_environment[var_name]
     else:
         raise RinhaError(f"Variable '{var_name}' not defined")
 
